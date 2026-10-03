@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Kotak aspirasi OSIM MA Almusdariyah. Sampaikan saran, kritik, ide kegiatan, dan keluhan."
+  />
+  <title>Aspirasi OSIM MA Almusdariyah</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<script src="stars.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="app.js"></script>
+<body>
+
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <main class="container">
+
+    <header class="site-header">
+      <div class="eyebrow">
+        <span class="dot" aria-hidden="true"></span>
+        Kotak aspirasi
+      </div>
+      <h1>Sampaikan aspirasimu.</h1>
+      <p class="lede">
+        Ruang terbuka bagi seluruh siswa almusdariyah untuk menyampaikan saran, kritik,
+        ide kegiatan, dan keluhan kepada pengurus OSIM.
+      </p>
+      <div class="rule" aria-hidden="true"></div>
+    </header>
+
+    <section class="panel form-panel">
+
+      <!-- Blok identitas OSIM -->
+      <div class="form-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <img src="logo.png" alt="Logo OSIM MA Almusdariyah" />
+            <circle cx="40" cy="40" r="36" />
+            <circle cx="40" cy="40" r="28" />
+            <path d="M40 18 L53 40 L40 62 L27 40 Z" />
+            <circle cx="40" cy="40" r="3" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+        <div class="brand-name">OSIM MA Almusdariyah</div>
+        <div class="brand-meta">Masa jabatan 2026 / 2027</div>
+      </div>
+
+      <form id="form-aspirasi" autocomplete="off">
+
+        <fieldset class="field field-category">
+          <legend>Kategori</legend>
+          <div class="chips">
+            <label class="chip">
+              <input type="radio" name="kategori" value="Saran" checked />
+              <span>Saran</span>
+            </label>
+            <label class="chip">
+              <input type="radio" name="kategori" value="Kritik" />
+              <span>Kritik</span>
+            </label>
+            <label class="chip">
+              <input type="radio" name="kategori" value="Ide" />
+              <span>Ide kegiatan</span>
+            </label>
+            <label class="chip">
+              <input type="radio" name="kategori" value="Keluhan" />
+              <span>Keluhan</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="nama">Nama <span class="hint">opsional</span></label>
+          <input
+            type="text"
+            id="nama"
+            name="nama"
+            placeholder="Nama, kelas, atau kosongkan untuk anonim"
+            maxlength="40"
+          />
+        </div>
+
+        <div class="field">
+          <label for="isi">Aspirasi</label>
+          <textarea
+            id="isi"
+            name="isi"
+            placeholder="Tulis dengan jelas dan sopan."
+            maxlength="500"
+            required
+          ></textarea>
+          <div class="field-foot">
+            <span>Maksimal 500 karakter</span>
+            <span class="counter"><span id="counter">0</span>/500</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn">Kirim aspirasi</button>
+
+      </form>
+    </section>
+
+    <section class="panel list-panel">
+      <header class="panel-head">
+        <span class="panel-title">Aspirasi masuk</span>
+        <span class="panel-count" id="total">02</span>
+      </header>
+
+      <div id="list">
+        <article class="aspirasi-item">
+          <div class="item-meta">
+            <span class="tag tag-saran">Saran</span>
+            <span class="item-name">Anonim</span>
+            <span class="item-dot">/</span>
+            <span class="item-time">baru saja</span>
+          </div>
+          <p class="item-body">
+            Contoh aspirasi. Setelah data terhubung, isi asli akan tampil di sini
+            dan dapat dibaca oleh seluruh siswa.
+          </p>
+        </article>
+
+        <article class="aspirasi-item">
+          <div class="item-meta">
+            <span class="tag tag-ide">Ide</span>
+            <span class="item-name">Rian, XI-A</span>
+            <span class="item-dot">/</span>
+            <span class="item-time">2 menit lalu</span>
+          </div>
+          <p class="item-body">
+            Usul diadakan pekan olahraga antar kelas setiap semester.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      Aspirasi bersifat publik dan dapat dibaca oleh seluruh siswa.
+      Mohon tidak mencantumkan data pribadi.
+    </footer>
+
+  </main>
+
+  <script src="stars.js"></script>
+</body>
+</html>
