@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
     appId: "1:722253405963:web:0e1ccf2bb1bfc238d98c0e"
   };
 
-  // Cek dependensi dulu, supaya error-nya jelas
   if (typeof firebase === "undefined") {
     console.error("Firebase SDK belum dimuat. Cek urutan tag <script> di index.html.");
     return;
@@ -32,12 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
   var counter = document.getElementById("counter");
   var listEl = document.getElementById("list");
   var totalEl = document.getElementById("total");
+  var filterBar = document.getElementById("filter-bar");
 
-  // Cek semua elemen ada
-  if (!form || !inputNama || !inputIsi || !counter || !listEl || !totalEl) {
-    console.error("Elemen form tidak lengkap. Cek id di index.html:",
-      { form: !!form, inputNama: !!inputNama, inputIsi: !!inputIsi,
-        counter: !!counter, listEl: !!listEl, totalEl: !!totalEl });
+  if (!form || !inputNama || !inputIsi || !counter || !listEl || !totalEl || !filterBar) {
+    console.error("Elemen tidak lengkap. Cek id di index.html.");
     return;
   }
 
@@ -47,7 +44,11 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  // ---- 3. Counter karakter real-time ----
+  // ---- 3. State ----
+  var currentFilter = "Semua";
+  var allItems = []; // cache semua aspirasi dari listener
+
+  // ---- 4. Counter karakter real-time ----
   inputIsi.addEventListener("input", function () {
     var len = inputIsi.value.length;
     counter.textContent = len;
@@ -55,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     else counter.parentElement.classList.remove("near-limit");
   });
 
-  // ---- 4. Handler submit form ----
+  // ---- 5. Handler submit form ----
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
@@ -95,73 +96,117 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // ---- 5. Listener real-time ----
+  // ---- 6. Filter handler ----
+  filterBar.addEventListener("click", function (e) {
+    var btn = e.target.closest(".filter-chip");
+    if (!btn) return;
+
+    var value = btn.getAttribute("data-filter");
+    if (!value || value === currentFilter) return;
+
+    currentFilter = value;
+
+    // Update kelas aktif
+    var chips = filterBar.querySelectorAll(".filter-chip");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].classList.toggle("is-active", chips[i] === btn);
+    }
+
+    renderList();
+  });
+
+  // ---- 7. Listener real-time ----
   var q = db.collection(COL).orderBy("waktu", "desc");
 
   q.onSnapshot(
     function (snapshot) {
-      listEl.innerHTML = "";
-
-      if (snapshot.empty) {
-        var empty = document.createElement("div");
-        empty.className = "aspirasi-item";
-        var p = document.createElement("p");
-        p.className = "item-body";
-        p.textContent = "Belum ada aspirasi. Jadilah yang pertama.";
-        empty.appendChild(p);
-        listEl.appendChild(empty);
-        totalEl.textContent = "00";
-        return;
-      }
-
-      var count = 0;
+      // Simpan ke cache
+      allItems = [];
       snapshot.forEach(function (doc) {
         var d = doc.data();
-        count++;
-
-        var item = document.createElement("article");
-        item.className = "aspirasi-item";
-
-        var tag = document.createElement("span");
-        tag.className = "tag tag-" + String(d.kategori || "").toLowerCase();
-        tag.textContent = d.kategori || "";
-
-        var meta = document.createElement("div");
-        meta.className = "item-meta";
-        meta.appendChild(tag);
-
-        var nameEl = document.createElement("span");
-        nameEl.className = "item-name";
-        nameEl.textContent = d.nama || "Anonim";
-        meta.appendChild(nameEl);
-
-        var dot = document.createElement("span");
-        dot.className = "item-dot";
-        dot.textContent = "/";
-        meta.appendChild(dot);
-
-        var timeEl = document.createElement("span");
-        timeEl.className = "item-time";
-        timeEl.textContent = formatWaktu(d.waktu);
-        meta.appendChild(timeEl);
-
-        var body = document.createElement("p");
-        body.className = "item-body";
-        body.textContent = d.isi;
-
-        item.appendChild(meta);
-        item.appendChild(body);
-        listEl.appendChild(item);
+        allItems.push({
+          id: doc.id,
+          nama: d.nama || "Anonim",
+          isi: d.isi || "",
+          kategori: d.kategori || "",
+          waktu: d.waktu,
+        });
       });
 
-      totalEl.textContent = String(count).padStart(2, "0");
+      renderList();
     },
     function (err) {
       console.error("Listener error:", err);
     }
   );
 
-  // ---- 6. Format waktu relatif ----
+  // ---- 8. Render list sesuai filter ----
+  function renderList() {
+    listEl.innerHTML = "";
+
+    var filtered = allItems.filter(function (item) {
+      return currentFilter === "Semua" || item.kategori === currentFilter;
+    });
+
+    if (filtered.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "aspirasi-item";
+
+      var p = document.createElement("p");
+      p.className = "item-body";
+      p.textContent =
+        currentFilter === "Semua"
+          ? "Belum ada aspirasi. Jadilah yang pertama."
+          : "Belum ada aspirasi untuk kategori " + currentFilter + ".";
+      empty.appendChild(p);
+      listEl.appendChild(empty);
+    } else {
+      filtered.forEach(function (item) {
+        listEl.appendChild(buildItem(item));
+      });
+    }
+
+    totalEl.textContent = String(filtered.length).padStart(2, "0");
+  }
+
+  // ---- 9. Bangun elemen satu item ----
+  function buildItem(item) {
+    var el = document.createElement("article");
+    el.className = "aspirasi-item";
+
+    var meta = document.createElement("div");
+    meta.className = "item-meta";
+
+    var tag = document.createElement("span");
+    tag.className = "tag tag-" + String(item.kategori).toLowerCase();
+    tag.textContent = item.kategori;
+    meta.appendChild(tag);
+
+    var nameEl = document.createElement("span");
+    nameEl.className = "item-name";
+    nameEl.textContent = item.nama;
+    meta.appendChild(nameEl);
+
+    var dot = document.createElement("span");
+    dot.className = "item-dot";
+    dot.textContent = "/";
+    meta.appendChild(dot);
+
+    var timeEl = document.createElement("span");
+    timeEl.className = "item-time";
+    timeEl.textContent = formatWaktu(item.waktu);
+    meta.appendChild(timeEl);
+
+    var body = document.createElement("p");
+    body.className = "item-body";
+    body.textContent = item.isi;
+
+    el.appendChild(meta);
+    el.appendChild(body);
+    return el;
+  }
+
+  // ---- 10. Format waktu relatif ----
   function formatWaktu(ts) {
     if (!ts) return "baru saja";
 
