@@ -5,13 +5,14 @@
 document.addEventListener("DOMContentLoaded", function () {
 
   // ---- 1. Konfigurasi Firebase ----
-  var firebaseConfig = {
-    apiKey: "GANTI_DENGAN_API_KEY_MU",
-    authDomain: "GANTI.firebaseapp.com",
-    projectId: "GANTI",
-    storageBucket: "GANTI.appspot.com",
-    messagingSenderId: "GANTI",
-    appId: "GANTI",
+  const firebaseConfig = {
+    apiKey: "AIzaSyC4hCbhiUkve07_ydcv0u4v91jA44MFFKo",
+    authDomain: "kotak-aspirasi-osim-ma.firebaseapp.com",
+    databaseURL: "https://kotak-aspirasi-osim-ma-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "kotak-aspirasi-osim-ma",
+    storageBucket: "kotak-aspirasi-osim-ma.firebasestorage.app",
+    messagingSenderId: "722253405963",
+    appId: "1:722253405963:web:0e1ccf2bb1bfc238d98c0e"
   };
 
   // Cek dependensi dulu, supaya error-nya jelas
