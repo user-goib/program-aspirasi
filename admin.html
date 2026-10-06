@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin — Aspirasi OSIM MA Almusdariyah</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <main class="container">
+
+    <header class="site-header">
+      <div class="eyebrow">
+        <span class="dot" aria-hidden="true"></span>
+        Panel pengurus
+      </div>
+      <h1>Kelola aspirasi.</h1>
+      <p class="lede">
+        Halaman ini hanya untuk pengurus OSIM. Masuk untuk meninjau dan
+        menghapus aspirasi yang tidak pantas.
+      </p>
+      <div class="rule" aria-hidden="true"></div>
+    </header>
+
+    <!-- Bagian login -->
+    <section class="panel form-panel" id="login-section">
+      <div class="form-brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg
+            viewBox="0 0 80 80"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linejoin="round"
+          >
+            <circle cx="40" cy="40" r="36" />
+            <circle cx="40" cy="40" r="28" />
+            <path d="M40 18 L53 40 L40 62 L27 40 Z" />
+            <circle cx="40" cy="40" r="3" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+        <div class="brand-name">OSIM MA Almusdariyah</div>
+        <div class="brand-meta">Panel admin</div>
+      </div>
+
+      <form id="login-form" autocomplete="on">
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="nama@email.com"
+            required
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Kata sandi</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Kata sandi"
+            required
+            minlength="6"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="login-error" id="login-error" role="alert"></div>
+
+        <button type="submit" class="btn" id="btn-login">Masuk</button>
+      </form>
+    </section>
+
+    <!-- Bagian panel admin (default disembunyikan) -->
+    <section class="panel list-panel" id="admin-section" hidden>
+      <header class="panel-head">
+        <span class="admin-session" id="admin-email">-</span>
+        <button type="button" class="btn-logout" id="btn-logout">Keluar</button>
+      </header>
+
+      <div class="filter-bar" id="filter-bar">
+        <button type="button" class="filter-chip is-active" data-filter="Semua">Semua</button>
+        <button type="button" class="filter-chip" data-filter="Saran">Saran</button>
+        <button type="button" class="filter-chip" data-filter="Kritik">Kritik</button>
+        <button type="button" class="filter-chip" data-filter="Ide">Ide</button>
+        <button type="button" class="filter-chip" data-filter="Keluhan">Keluhan</button>
+      </div>
+
+      <div id="list"></div>
+    </section>
+
+    <footer class="site-footer">
+      Panel ini hanya untuk pengurus OSIM. Jangan bagikan tautan ini.
+    </footer>
+
+  </main>
+
+  <script src="stars.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
