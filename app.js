@@ -56,45 +56,85 @@ document.addEventListener("DOMContentLoaded", function () {
     else counter.parentElement.classList.remove("near-limit");
   });
 
-  // ---- 5. Handler submit form ----
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    var isi = inputIsi.value.trim();
-    var nama = inputNama.value.trim() || "Anonim";
-    var checked = form.querySelector('input[name="kategori"]:checked');
-    var kategori = checked ? checked.value : "Saran";
-
-    if (isi.length < 3) {
-      alert("Aspirasi terlalu pendek. Tulis minimal 3 karakter.");
-      return;
+    // ---- 5. Rate limiting state ----
+    var RATE_KEY = "aspirasi_last_send";
+    var RATE_WINDOW = 30000; // 30 detik dalam milidetik
+  
+    function sisaWaktuKirim() {
+      var last = parseInt(localStorage.getItem(RATE_KEY) || "0", 10);
+      var elapsed = Date.now() - last;
+      if (elapsed >= RATE_WINDOW) return 0;
+      return Math.ceil((RATE_WINDOW - elapsed) / 1000);
     }
-
-    btnKirim.disabled = true;
-    var teksAsli = btnKirim.textContent;
-    btnKirim.textContent = "Mengirim...";
-
-    try {
-      await db.collection(COL).add({
-        nama: nama,
-        isi: isi,
-        kategori: kategori,
-        waktu: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-
-      inputNama.value = "";
-      inputIsi.value = "";
-      counter.textContent = "0";
-      counter.parentElement.classList.remove("near-limit");
-      inputNama.focus();
-    } catch (err) {
-      console.error("Gagal mengirim:", err);
-      alert("Gagal mengirim. Cek Console (F12) untuk detail.");
-    } finally {
-      btnKirim.disabled = false;
-      btnKirim.textContent = teksAsli;
+  
+    function kunciTombolSementara() {
+      var sisa = sisaWaktuKirim();
+      if (sisa <= 0) {
+        btnKirim.disabled = false;
+        btnKirim.textContent = "Kirim aspirasi";
+        return;
+      }
+  
+      btnKirim.disabled = true;
+      btnKirim.textContent = "Tunggu " + sisa + " detik";
+  
+      setTimeout(kunciTombolSementara, 1000);
     }
-  });
+  
+    // Kunci tombol saat halaman dibuka kalau masih dalam cooldown
+    kunciTombolSementara();
+  
+    // ---- 6. Handler submit form ----
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+  
+      // Cek rate limit lagi (lapisan kedua, kalau-kalau tombol sempat aktif)
+      var sisa = sisaWaktuKirim();
+      if (sisa > 0) {
+        alert("Tunggu " + sisa + " detik sebelum mengirim aspirasi lagi.");
+        return;
+      }
+  
+      var isi = inputIsi.value.trim();
+      var nama = inputNama.value.trim() || "Anonim";
+      var checked = form.querySelector('input[name="kategori"]:checked');
+      var kategori = checked ? checked.value : "Saran";
+  
+      if (isi.length < 3) {
+        alert("Aspirasi terlalu pendek. Tulis minimal 3 karakter.");
+        return;
+      }
+  
+      btnKirim.disabled = true;
+      var teksAsli = btnKirim.textContent;
+      btnKirim.textContent = "Mengirim...";
+  
+      try {
+        await db.collection(COL).add({
+          nama: nama,
+          isi: isi,
+          kategori: kategori,
+          waktu: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+  
+        // Catat waktu kirim BERHASIL
+        localStorage.setItem(RATE_KEY, String(Date.now()));
+  
+        inputNama.value = "";
+        inputIsi.value = "";
+        counter.textContent = "0";
+        counter.parentElement.classList.remove("near-limit");
+        inputNama.focus();
+  
+        // Mulai cooldown
+        kunciTombolSementara();
+      } catch (err) {
+        console.error("Gagal mengirim:", err);
+        alert("Gagal mengirim. Cek Console (F12) untuk detail.");
+        btnKirim.disabled = false;
+        btnKirim.textContent = teksAsli;
+      }
+    });
 
   // ---- 6. Filter handler ----
   filterBar.addEventListener("click", function (e) {
